@@ -1,11 +1,11 @@
 module.exports = {
   rustoria: {
-    day: 45,
-    night: 15,
     servers: {
       us_long: {
         ip: '108.61.205.238',
-        port: '28083'
+        port: '28083',
+        day: 45,
+        night: 15
       }
     }
   },

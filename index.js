@@ -32,7 +32,7 @@ const discordBot = new Bot();
   const serverConfig = _.get(providerConfig.servers, `${serverType}`);
   try {
     const rustplus = new RustPlus(serverConfig.ip, serverConfig.port, process.env.PLAYER_ID, process.env.PLAYER_TOKEN || args[4]);
-    discordBot.init({ rustCommands: availableCommands, rustbot: rustplus });
+    discordBot.init({ rustCommands: availableCommands, rustbot: rustplus, serverConfig });
     rustplus.on('connected', () => {
       console.log('test');
     });

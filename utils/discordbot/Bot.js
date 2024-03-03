@@ -1,4 +1,4 @@
-const { Client, Collection, GatewayIntentBits, Partials, EmbedBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField, REST, Routes, Events } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials, REST, Routes, Events } = require('discord.js');
 const _ = require('lodash');
 
 const TIMEOUT_SECONDS = 5000;
@@ -27,7 +27,7 @@ module.exports = class Bot {
     return allCommands;
   }
 
-  init = async ({ rustCommands, rustbot }) => {
+  init = async ({ rustCommands, rustbot, serverConfig }) => {
     if (this._discordClient) return this._discordClient;
     this._rustCommands = rustCommands;
     try {
@@ -68,7 +68,7 @@ module.exports = class Bot {
         this._discordClient.on(Events.InteractionCreate, async interaction => {
           if (!interaction.isChatInputCommand()) return;
 
-          await this._rustCommandsMap[interaction.commandName]({ interaction, rustbot });
+          await this._rustCommandsMap[interaction.commandName]({ interaction, rustbot, serverConfig });
         });
 
         this._isBotOnline = true;
