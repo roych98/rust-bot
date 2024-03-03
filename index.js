@@ -1,8 +1,8 @@
 require('dotenv').config();
 const _ = require('lodash');
 const RustPlus = require('@liamcottle/rustplus.js');
-const { Client, GatewayIntentBits, Partials, EmbedBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
-const Bot = require('./utils/Bot');
+const Bot = require('./utils/discordbot/Bot');
+const { getAvailableCommands } = require('./utils/commands.utils');
 
 const providersConfig = require('./rust.servers.config');
 
@@ -26,15 +26,17 @@ const discordBot = new Bot();
     return;
   }
 
+  const availableCommands = await getAvailableCommands();
+  console.log(`Available commands: ${_.join(availableCommands, ', ')}`);
+
   const serverConfig = _.get(providerConfig.servers, `${serverType}`);
   try {
-    const rustplus = new RustPlus(serverConfig.ip, serverConfig.port, process.env.PLAYER_ID, process.env.PLAYER_TOKEN);
-    await discordBot.init();
+    const rustplus = new RustPlus(serverConfig.ip, serverConfig.port, process.env.PLAYER_ID, process.env.PLAYER_TOKEN || args[4]);
+    discordBot.init({ rustCommands: availableCommands, rustbot: rustplus });
     rustplus.on('connected', () => {
       console.log('test');
     });
 
-    // connect to rust server
     rustplus.connect();
   } catch (e) {
     console.error(e);
