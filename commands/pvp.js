@@ -1,8 +1,16 @@
 const { SlashCommandBuilder } = require('discord.js');
 const _ = require('lodash');
 
+function findXGrid (mapSize, gridSize, currentPosition) {
+  return Math.floor(currentPosition / gridSize);
+}
+
+function findYGrid (mapSize, gridSize, currentPosition) {
+  return Math.ceil(currentPosition / gridSize);
+}
+
 const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data) => {
-  const gridSize = 150;
+  const gridSize = 146.3;
   const mapSize = serverConfig.size;
 
   const info = _.reduce(data?.response.teamInfo.members, (acc, member) => {
@@ -16,21 +24,25 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
       const gridWidth = Math.ceil(mapSize / gridSize);
       const gridHeight = Math.ceil(mapSize / gridSize);
 
-      const row = Math.floor(playerY / gridSize);
-      const col = Math.floor(playerX / gridSize);
-
-      const colIdx1 = Math.floor(col / 26);
-      const colIdx2 = col % 26;
-
-      let letter = '';
-      if (colIdx1 > 0) {
-        letter += String.fromCharCode(65 + colIdx1 - 1);
+      const xMap = {};
+      const yMap = {};
+      for (let i = 0; i < gridWidth; i++) {
+        let letter = String.fromCharCode(i >= 26 ? 65 - 26 + i : 65 + i);
+        if (i >= 26) {
+          letter = `A${letter}`;
+        }
+        xMap[i] = `${letter}`;
       }
-      letter += String.fromCharCode(65 + colIdx2);
 
-      const number = gridHeight - row - 1;
+      for (let i = gridHeight - 1; i >= 0; i--) {
+        yMap[`${gridHeight - 1 - i}`] = i;
+      }
 
-      return `${letter}${number}`;
+      const relativeX = findXGrid(mapSize, gridSize, playerX);
+
+      const relativeY = findYGrid(mapSize, gridSize, playerY);
+
+      return `${xMap[relativeX]}${yMap[relativeY]}`;
     }
 
     const playerGrid = calculateGrid(mapSize, gridSize, x, y);
@@ -56,6 +68,6 @@ module.exports = {
 
     rustbot.pvpInterval = setInterval(() => {
       refreshPvpData({ rustbot, serverConfig });
-    }, 10000);
+    }, 5000);
   }
 };
