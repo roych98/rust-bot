@@ -1,7 +1,7 @@
 const { Client, Collection, GatewayIntentBits, Partials, REST, Routes, Events } = require('discord.js');
 const _ = require('lodash');
 
-const TIMEOUT_SECONDS = 5000;
+const TIMEOUT_SECONDS = 10000;
 
 module.exports = class Bot {
   _isBotOnline = false;
