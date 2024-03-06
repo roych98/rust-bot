@@ -3,10 +3,34 @@ const _ = require('lodash');
 const { getGridData } = require('../utils/grid');
 
 const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data) => {
-  const info = _.reduce(data?.response.teamInfo.members, (acc, member) => {
+  const onlinePlayers = data?.response.teamInfo.members.filter(member => member.isOnline);
+  const info = _.reduce(onlinePlayers, (acc, member) => {
     const name = member.name;
     const x = member.x;
     const y = member.y;
+
+    if (!rustbot?.teamData?.[`${name}`]) {
+      _.set(rustbot, `teamData.${name}`, { x, y, intervalCount: 1, exclude: false });
+    } else {
+      const playerData = rustbot?.teamData[`${name}`];
+      if (playerData.x === x && playerData.y === y) {
+        if (playerData?.intervalCount === 3) {
+          playerData.exclude = true;
+        } else {
+          playerData.intervalCount++;
+        }
+      } else {
+        playerData.x = x;
+        playerData.y = y;
+        playerData.intervalCount = 0;
+        playerData.exclude = false;
+      }
+    }
+
+    // Players will be excluded from being reported if they're afk or manually excluded
+    const shouldBeExcluded = rustbot?.teamData?.[`${name}`]?.exclude || rustbot?.pvpToExclude?.name;
+    if (shouldBeExcluded) return acc;
+
     const isAlive = member.isAlive;
     const deadTimestamp = member.deathTime;
 
@@ -16,7 +40,7 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
     return acc;
   }, []);
   _.forEach(info, member => {
-    rustbot.sendTeamMessage(`${member.name} | Grid: ${member.playerGrid} (${member.direction}) | ${member.isAlive ? 'Alive' : 'Dead'} ${!member.isAlive ? ` | Died: ${Math.floor(member.deadSince)} seconds ago` : ''}`);
+    rustbot.sendTeamMessage(`${member.name} | Grid: ${member.playerGrid} (${member.direction})${member.isAlive ? ' | Alive' : ''} ${!member.isAlive ? ` | Died: ${Math.floor(member.deadSince)} seconds ago` : ''}`);
   });
 });
 
@@ -27,10 +51,13 @@ module.exports = {
   execute: async ({ rustbot, interaction, serverConfig, replyInGame }) => {
     if (rustbot.pvpInterval) {
       clearInterval(rustbot.pvpInterval);
+      rustbot.pvpToExclude = undefined;
       rustbot.pvpInterval = undefined;
+      rustbot.teamData = undefined;
       return;
     }
 
+    refreshPvpData({ rustbot, serverConfig });
     rustbot.pvpInterval = setInterval(() => {
       refreshPvpData({ rustbot, serverConfig });
     }, 10000);

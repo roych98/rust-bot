@@ -7,12 +7,12 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('scan')
     .setDescription('Scan shops for specific items'),
-  execute: async ({ rustbot, interaction, serverConfig, args }) => {
+  execute: ({ rustbot, interaction, serverConfig, args }) => {
     if (args > 1) {
       return;
     }
     const itemToFind = args[0];
-    await rustbot.getMapMarkers(async data => {
+    rustbot.getMapMarkers(data => {
       const reducedResults = _.reduce(data?.response?.mapMarkers?.markers, (acc, appMarker) => {
         if (appMarker.type === 3 && !appMarker.outOfStock) {
           _.map(appMarker.sellOrders, sellOrder => {

@@ -5,7 +5,7 @@ module.exports = {
     .setName('time')
     .setDescription('Get the current server-time, and when night or day time is about to end.'),
   execute: async ({ rustbot, interaction, serverConfig, replyInGame }) => {
-    await rustbot.getTime(async response => {
+    rustbot.getTime(async response => {
       // time, sunrise, sunset, scale(?)
       const time = response.response.time;
 
