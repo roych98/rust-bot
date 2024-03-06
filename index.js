@@ -34,15 +34,16 @@ const discordBot = new Bot();
     const rustplus = new RustPlus(serverConfig.ip, serverConfig.port, process.env.PLAYER_ID, process.env.PLAYER_TOKEN || args[4]);
     await discordBot.init({ rustCommands: availableCommands, rustbot: rustplus, serverConfig });
     rustplus.on('connected', () => {
-      rustplus.sendTeamMessage('Amir is GAY! :skull:');
+      rustplus.sendTeamMessage('Bot is now active');
+      rustplus.sendTeamMessage(`Available commands: ${_.join(availableCommands, ', ')}`);
     });
 
     rustplus.on('message', (message) => {
       const teamMessage = message.broadcast?.teamMessage?.message?.message;
       if (!teamMessage) return;
-      const realCommand = teamMessage.replace('!', '');
+      const realCommand = teamMessage.split(' ')[0].replace('!', '');
       if (!_.includes(availableCommands, realCommand)) return;
-      return require(`./commands/${realCommand}`).execute({ rustbot: rustplus, serverConfig, replyInGame: true });
+      return require(`./commands/${realCommand}`).execute({ rustbot: rustplus, serverConfig, replyInGame: true, args: teamMessage.split(' ').splice(1) });
     });
 
     rustplus.connect();
