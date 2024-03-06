@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const _ = require('lodash');
+const moment = require('moment');
 
 function findXGrid (mapSize, gridSize, currentPosition) {
   return Math.floor(currentPosition / gridSize);
@@ -8,6 +9,18 @@ function findXGrid (mapSize, gridSize, currentPosition) {
 function findYGrid (mapSize, gridSize, currentPosition) {
   return Math.ceil(currentPosition / gridSize);
 }
+
+const getGridDirection = (gridSize, currentPosition, type, relative) => {
+  const mockCurrentPosition = currentPosition;
+  switch (type) {
+    case 'x': {
+      return mockCurrentPosition > (relative * gridSize) + (gridSize / 2) ? 'Right' : 'Left';
+    }
+    case 'y': {
+      return mockCurrentPosition > (relative * gridSize) - (gridSize / 2) ? 'Top' : 'Bottom';
+    }
+  }
+};
 
 const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data) => {
   const gridSize = 146.3;
@@ -20,7 +33,10 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
     const isAlive = member.isAlive;
     const deadTimestamp = member.deathTime;
 
-    function calculateGrid (mapSize, gridSize, playerX, playerY) {
+    const relativeX = findXGrid(mapSize, gridSize, x);
+    const relativeY = findYGrid(mapSize, gridSize, y);
+
+    function calculateGrid (mapSize, gridSize) {
       const gridWidth = Math.ceil(mapSize / gridSize);
       const gridHeight = Math.ceil(mapSize / gridSize);
 
@@ -38,20 +54,21 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
         yMap[`${gridHeight - 1 - i}`] = i;
       }
 
-      const relativeX = findXGrid(mapSize, gridSize, playerX);
-
-      const relativeY = findYGrid(mapSize, gridSize, playerY);
-
       return `${xMap[relativeX]}${yMap[relativeY]}`;
     }
 
     const playerGrid = calculateGrid(mapSize, gridSize, x, y);
+
+    const xDirection = getGridDirection(gridSize, x, 'x', relativeX);
+    const yDirection = getGridDirection(gridSize, y, 'y', relativeY);
+
     console.log(x, y);
-    acc.push({ name, playerGrid, isAlive, deadSince: (Date.now() - deadTimestamp) / 1000 });
+
+    acc.push({ name, playerGrid, isAlive, deadSince: (Date.now() - moment(deadTimestamp).valueOf()) / 1000, direction: `${yDirection} ${xDirection}` });
     return acc;
   }, []);
   _.forEach(info, member => {
-    rustbot.sendTeamMessage(`${member.name} | Grid: ${member.playerGrid} | Is Alive: ${member.isAlive} ${!member.isAlive ? ` | Dead since: ${member.deadSince}` : ''}`);
+    rustbot.sendTeamMessage(`${member.name} | Grid: ${member.playerGrid} (${member.direction}) | Is Alive: ${member.isAlive} ${!member.isAlive ? ` | Dead since: ${member.deadSince}` : ''}`);
   });
 });
 
@@ -68,6 +85,6 @@ module.exports = {
 
     rustbot.pvpInterval = setInterval(() => {
       refreshPvpData({ rustbot, serverConfig });
-    }, 5000);
+    }, 10000);
   }
 };
