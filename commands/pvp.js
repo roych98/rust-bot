@@ -28,7 +28,7 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
     }
 
     // Players will be excluded from being reported if they're afk or manually excluded
-    const shouldBeExcluded = rustbot?.teamData?.[`${name}`]?.exclude || rustbot?.pvpToExclude?.name;
+    const shouldBeExcluded = _.get(rustbot?.teamData?.[`${name}`], 'exclude', false) || _.get(rustbot, `pvpToExclude.${name}`, false);
     if (shouldBeExcluded) return acc;
 
     const isAlive = member.isAlive;

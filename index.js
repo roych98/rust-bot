@@ -40,10 +40,12 @@ const discordBot = new Bot();
 
     rustplus.on('message', (message) => {
       const teamMessage = message.broadcast?.teamMessage?.message?.message;
+      const playerName = message.broadcast?.teamMessage?.message?.name;
+      const steamId = message.broadcast?.teamMessage?.message?.steamId.toString();
       if (!teamMessage) return;
       const realCommand = teamMessage.split(' ')[0].replace('!', '');
       if (!_.includes(availableCommands, realCommand)) return;
-      return require(`./commands/${realCommand}`).execute({ rustbot: rustplus, serverConfig, replyInGame: true, args: teamMessage.split(' ').splice(1) });
+      return require(`./commands/${realCommand}`).execute({ rustbot: rustplus, serverConfig, replyInGame: true, args: teamMessage.split(' ').splice(1), steamId, playerName });
     });
 
     rustplus.connect();

@@ -8,10 +8,14 @@ module.exports = {
     .setName('scan')
     .setDescription('Scan shops for specific items'),
   execute: ({ rustbot, interaction, serverConfig, args }) => {
-    if (args > 1) {
+    if (_.size(args) > 1) {
       return;
     }
     const itemToFind = args[0];
+    if (!_.get(nameToId, itemToFind)) {
+      rustbot.sendTeamMessage(`Item ${itemToFind} does not exist. Please refer to discord to find the correct item name`);
+      return;
+    }
     rustbot.getMapMarkers(data => {
       const reducedResults = _.reduce(data?.response?.mapMarkers?.markers, (acc, appMarker) => {
         if (appMarker.type === 3 && !appMarker.outOfStock) {
