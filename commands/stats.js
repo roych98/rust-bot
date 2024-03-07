@@ -12,7 +12,9 @@ module.exports = {
       const pvpStats = {
         playerKills: data.pvp.data.pvp_player_kills_total,
         playerDeaths: data.pvp.data.pvp_player_deaths_total + data.pvp.data.pvp_player_deaths_suicides,
-        playerHeadshots: data.pvp.data.pvp_player_headshot
+        playerHeadshots: data.pvp.data.pvp_player_headshot,
+        bulletsHit: data.pvp.data.weapon_bullet_hit_player,
+        bulletsTotal: data.pvp.data.weapon_bullet_fired_total
       };
 
       const resourcesStats = {
@@ -31,10 +33,12 @@ module.exports = {
       });
 
       rustbot.sendTeamMessage(`>> ${responseName} Stats:`);
-      rustbot.sendTeamMessage(`:rifle.ak:: ${pvpStats.playerKills} | :skull:: ${pvpStats.playerDeaths} | :rustheadbash:: ${(pvpStats.playerHeadshots / pvpStats.playerKills).toFixed(2)}% | KD: ${(pvpStats.playerKills / pvpStats.playerDeaths).toFixed(2)}`);
+      rustbot.sendTeamMessage(`:rifle.ak:: ${pvpStats.playerKills} | :skull:: ${pvpStats.playerDeaths} | KD: ${(pvpStats.playerKills / pvpStats.playerDeaths).toFixed(2)}`);
+      rustbot.sendTeamMessage(`:peperifle:: ${Math.floor((pvpStats.bulletsHit / pvpStats.bulletsTotal)) * 100}% | :rustheadbash:: ${(Math.floor(pvpStats.playerHeadshots / pvpStats.bulletsTotal)) * 100}%`);
+
       rustbot.sendTeamMessage(`:wood:: ${resourcesStats.wood} | :stones:: ${resourcesStats.stone} | :sulfur::${resourcesStats.sulfur} | :metal.fragments:: ${resourcesStats.metal} | :hq.metal.ore:: ${resourcesStats.hqm} `);
     } catch (e) {
-      rustbot.sendTeamMessage(`Player ${playerName} needs to unprivate their statistics on >> https://rustoria.co/`);
+      rustbot.sendTeamMessage('Player needs to unprivate their statistics on >> https://rustoria.co/');
       console.log(e);
     }
   }
