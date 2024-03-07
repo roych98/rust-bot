@@ -9,8 +9,8 @@ const providersConfig = require('./rust.servers.config');
 const discordBot = new Bot();
 
 (async (args) => {
-  const serverProvider = args[2];
-  const serverType = args[3];
+  const serverProvider = args[2] || process.env.SERVER_PROVIDER;
+  const serverType = args[3] || process.env.SERVER_TYPE;
 
   const availableProviders = _.keys(providersConfig);
   if (!_.includes(availableProviders, serverProvider)) {
@@ -36,16 +36,25 @@ const discordBot = new Bot();
     rustplus.on('connected', () => {
       rustplus.sendTeamMessage('Bot is now active');
       rustplus.sendTeamMessage(`Available commands: ${_.join(availableCommands, ', ')}`);
+      rustplus.getTeamInfo((data) => {
+        const team = data.response.teamInfo.members;
+        _.forEach(team, dataSet => {
+          if (!rustplus.nameSteamIdMap) {
+            rustplus.nameSteamIdMap = {};
+          }
+          _.set(rustplus.nameSteamIdMap, dataSet.name, dataSet.steamId.toString());
+        });
+      });
     });
 
-    rustplus.on('message', (message) => {
+    rustplus.on('message', async (message) => {
       const teamMessage = message.broadcast?.teamMessage?.message?.message;
       const playerName = message.broadcast?.teamMessage?.message?.name;
-      const steamId = message.broadcast?.teamMessage?.message?.steamId.toString();
+      const steamId = message.broadcast?.teamMessage?.message?.steamId?.toString();
       if (!teamMessage) return;
       const realCommand = teamMessage.split(' ')[0].replace('!', '');
       if (!_.includes(availableCommands, realCommand)) return;
-      return require(`./commands/${realCommand}`).execute({ rustbot: rustplus, serverConfig, replyInGame: true, args: teamMessage.split(' ').splice(1), steamId, playerName });
+      return require(`./commands/${realCommand}`).execute({ rustbot: rustplus, serverConfig, replyInGame: true, args: teamMessage.split(' ').splice(1), steamId, playerName, serverType });
     });
 
     rustplus.connect();

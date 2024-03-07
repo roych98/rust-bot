@@ -7,7 +7,7 @@ module.exports = {
         day: 45,
         night: 15
       },
-      eu_medium: {
+      vanilla_medium_eu: {
         ip: '192.248.164.111',
         port: '28085',
         day: 45,

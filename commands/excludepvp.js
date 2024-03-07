@@ -9,17 +9,20 @@ module.exports = {
     if (_.size(args) === 0) {
       if (_.get(rustbot.pvpToExclude, playerName)) {
         _.set(rustbot, 'pvpToExclude', { [`${playerName}`]: false });
-        rustbot.sendTeamMessage(`Including ${playerName} in PVP messages again`);
+        rustbot.sendTeamMessage(`Including [${playerName}] in PVP messages again`);
       } else {
         _.set(rustbot, 'pvpToExclude', { [`${playerName}`]: true });
-        rustbot.sendTeamMessage(`Excluded ${playerName} from being shown in PVP messages`);
+        rustbot.sendTeamMessage(`Excluded [${playerName}] from being shown in PVP messages`);
       }
-    } else if (_.get(rustbot.pvpToExclude, args[0])) {
-      _.set(rustbot, 'pvpToExclude', { [`${args[0]}`]: false });
-      rustbot.sendTeamMessage(`Including ${args[0]} in PVP messages again`);
     } else {
-      _.set(rustbot, 'pvpToExclude', { [`${args[0]}`]: true });
-      rustbot.sendTeamMessage(`Excluded ${args[0]} from being shown in PVP messages`);
+      const targetName = _.join(args, ' ');
+      if (_.get(rustbot.pvpToExclude, targetName)) {
+        _.set(rustbot, 'pvpToExclude', { [`${targetName}`]: false });
+        rustbot.sendTeamMessage(`Including [${targetName}] in PVP messages again`);
+      } else {
+        _.set(rustbot, 'pvpToExclude', { [`${targetName}`]: true });
+        rustbot.sendTeamMessage(`Excluded [${targetName}] from being shown in PVP messages`);
+      }
     }
   }
 };

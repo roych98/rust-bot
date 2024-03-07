@@ -14,7 +14,7 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
     } else {
       const playerData = rustbot?.teamData[`${name}`];
       if (playerData.x === x && playerData.y === y) {
-        if (playerData?.intervalCount === 3) {
+        if (playerData?.intervalCount === 2) {
           playerData.exclude = true;
         } else {
           playerData.intervalCount++;
@@ -39,8 +39,8 @@ const refreshPvpData = ({ rustbot, serverConfig }) => rustbot.getTeamInfo((data)
     acc.push({ name, playerGrid, isAlive, deadSince: ((Date.now() / 1000) - deadTimestamp), direction: `${yDirection} ${xDirection}` });
     return acc;
   }, []);
-  _.forEach(info, member => {
-    rustbot.sendTeamMessage(`${member.name} | Grid: ${member.playerGrid} (${member.direction})${member.isAlive ? ' | Alive' : ''} ${!member.isAlive ? ` | Died: ${Math.floor(member.deadSince)} seconds ago` : ''}`);
+  _.forEach(info, (member, i) => {
+    setTimeout(() => rustbot.sendTeamMessage(`${member.name} | Grid: ${member.playerGrid} (${member.direction})${member.isAlive ? ' | Alive' : ''} ${!member.isAlive ? ` | Died: ${Math.floor(member.deadSince)} seconds ago` : ''}`), 250 * i);
   });
 });
 
@@ -60,6 +60,6 @@ module.exports = {
     refreshPvpData({ rustbot, serverConfig });
     rustbot.pvpInterval = setInterval(() => {
       refreshPvpData({ rustbot, serverConfig });
-    }, 10000);
+    }, 30000);
   }
 };

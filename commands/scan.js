@@ -28,16 +28,17 @@ module.exports = {
         return acc;
       }, []);
       rustbot.sendTeamMessage(`Shops that sell ${itemToFind}:`);
-      _.forEach(reducedResults, result => {
-        const grid = result.grid.playerGrid;
-        const xDirection = result.grid.xDirection;
-        const yDirection = result.grid.yDirection;
-        const amountAvailable = result.amount;
-        const needToBuy = result.require;
-        const quantityNeededToBuy = result.quantityNeededToBuy;
-        const howMuchYouGet = result.howMuchYouGet;
-
-        rustbot.sendTeamMessage(`Grid: ${grid} (${yDirection} ${xDirection}) | Amount: ${amountAvailable} | Needed: ${needToBuy} | How much to buy: ${quantityNeededToBuy} | You get: ${howMuchYouGet}`);
+      _.forEach(reducedResults, (result, i) => {
+        setTimeout((result) => {
+          const grid = result.grid.playerGrid;
+          const xDirection = result.grid.xDirection;
+          const yDirection = result.grid.yDirection;
+          const amountAvailable = result.amount;
+          const needToBuy = result.require;
+          const quantityNeededToBuy = result.quantityNeededToBuy;
+          const howMuchYouGet = result.howMuchYouGet;
+          rustbot.sendTeamMessage(`Grid: ${grid} (${yDirection} ${xDirection}) | Amount: ${amountAvailable} | Needed: ${needToBuy} | How much to buy: ${quantityNeededToBuy} | You get: ${howMuchYouGet}`);
+        }, 1000 * i, result);
       });
     });
   }
